@@ -1,0 +1,117 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Download Request Scheduler</title>
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: #f1f5f9;
+  margin: 0;
+  padding: 30px;
+}
+.container {
+  max-width: 750px;
+  margin: auto;
+  background: white;
+  padding: 25px;
+  border-radius: 12px;
+}
+h1 { color: #1d4ed8; }
+input, select, button {
+  padding: 10px;
+  margin: 5px 0;
+  box-sizing: border-box;
+}
+input, select { width: 100%; }
+button {
+  background: #2563eb;
+  color: white;
+  border: 0;
+  border-radius: 5px;
+  cursor: pointer;
+}
+li { margin: 10px 0; }
+</style>
+</head>
+<body>
+<div class="container">
+<h1>Download Request Scheduling System</h1>
+<p>Add requests and process the highest-priority pending request first.</p>
+
+<input id="filename" placeholder="Enter file name">
+<select id="priority">
+<option value="1">Priority 1 - Highest</option>
+<option value="2">Priority 2</option>
+<option value="3">Priority 3</option>
+<option value="4">Priority 4</option>
+<option value="5">Priority 5 - Lowest</option>
+</select>
+
+<button onclick="addRequest()">Add Request</button>
+<button onclick="processRequest()">Process Next Request</button>
+
+<h2>Request List</h2>
+<ol id="requests"></ol>
+<p id="message">No requests added yet.</p>
+</div>
+
+<script>
+let requests = [];
+let nextId = 1;
+
+function render() {
+  const list = document.getElementById("requests");
+  list.innerHTML = "";
+  requests.forEach(r => {
+    const li = document.createElement("li");
+    li.textContent = `${r.name} | Priority: ${r.priority} | ${r.status}`;
+    list.appendChild(li);
+  });
+}
+
+function addRequest() {
+  const field = document.getElementById("filename");
+  const name = field.value.trim();
+  const priority = Number(document.getElementById("priority").value);
+
+  if (!name) {
+    document.getElementById("message").textContent =
+      "Please enter a file name.";
+    return;
+  }
+
+  requests.push({
+    id: nextId++,
+    name,
+    priority,
+    status: "Pending"
+  });
+
+  field.value = "";
+  render();
+  document.getElementById("message").textContent =
+    "Request added successfully.";
+}
+
+function processRequest() {
+  const pending = requests
+    .filter(r => r.status === "Pending")
+    .sort((a, b) => a.priority - b.priority || a.id - b.id);
+
+  if (pending.length === 0) {
+    document.getElementById("message").textContent =
+      "No pending requests.";
+    return;
+  }
+
+  pending[0].status = "Processed";
+  render();
+  document.getElementById("message").textContent =
+    "Processed: " + pending[0].name;
+}
+</script>
+</body>
+</html>
